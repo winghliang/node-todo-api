@@ -23,6 +23,16 @@ app.post('/todos', (req, res) => {
   });
 });
 
+app.get('/todos', (req, res) => {
+  Todo.find().then( (todos) => {
+    // send todos in an object so that we can add more key/value pairs later if needed
+    // such as a status code
+    res.send({todos});
+  }, (err) => {
+    res.status(400).send(err);
+  });
+});
+
 app.listen(3000, () => {
   console.log('Listening on port 3000');
 });
