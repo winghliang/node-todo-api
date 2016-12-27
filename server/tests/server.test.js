@@ -10,7 +10,9 @@ const todos = [{
   text: "first test todo",
 }, {
   _id: new ObjectID(),
-  text: "second test todo"
+  text: "second test todo",
+  completed: true,
+  completedAt: 123
 }];
 
 // WARNING: this will clear the todos database b/c below we expect one todo item
@@ -148,4 +150,54 @@ describe('DELETE /todos/:id', () =>{
       .end(done);
   });
 
+});
+
+describe('PATCH /todos/:id', () => {
+  it('should update the todo when completed is set to true or text is changed', (done) => {
+    var hexID = todos[0]._id.toHexString();
+    var text = "updated todo"
+    request(app)
+      .patch(`/todos/${hexID}`)
+      .send({
+        text,
+        completed: true
+      })
+      .expect(200)
+      .expect( (res) => {
+        expect(res.body.todo.text).toBe(text);
+        expect(res.body.todo.completed).toBe(true);
+        expect(res.body.todo.completedAt).toBeA('number');
+      })
+    // below is not needed, but is done to check the database
+    .end( (err, res) => {
+      if (err) {
+        return done(err);
+      }
+      Todo.findById(hexID).then( (todo) => {
+        expect(todo.text).toBe(text);
+        expect(todo.completed).toBe(true);
+        expect(todo.completedAt).toBeA('number');
+        done();
+      }).catch( (err) => done(err) );
+    });
+  });
+
+
+  it('should clear completedAt when completed is set to false', (done) => {
+    var hexID = todos[1]._id.toHexString();
+    var text = "almost completed!"
+    request(app)
+      .patch(`/todos/${hexID}`)
+      .send({
+        completed: false,
+        text
+      })
+      .expect(200)
+      .expect( (res) => {
+        expect(res.body.todo.text).toBe(text),
+        expect(res.body.todo.completed).toBe(false);
+        expect(res.body.todo.completedAt).toBe(null);
+      })
+      .end(done);
+  });
 });

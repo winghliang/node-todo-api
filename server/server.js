@@ -75,6 +75,7 @@ app.patch('/todos/:id', (req, res) =>{
   // the user might pass in additional properties or properties we don't want updated (e.g., completedAt)
   // so we use the lodash pick method to limit what is pulled off
   var body = _.pick(req.body, ['text', 'completed']);
+  console.log(body);
 
   if (!ObjectID.isValid(id)){
     return res.status(404).send();
